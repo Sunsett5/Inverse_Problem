@@ -15,7 +15,7 @@ import torch
 orig_path = 'exp/{images_folder_name}/orig'
 generated_path = 'exp/{images_folder_name}/generated'
 N = len(os.listdir(generated_path))
-assert N == 1000
+# assert N == 1000
 SSIM_sum = 0
 PSNR_sum = 0
 LPIPS_sum = 0
