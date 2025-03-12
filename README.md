@@ -31,7 +31,7 @@ We use pre-trained models on CelebA-HQ, and FFHQ. Please download the pre-traine
 
 ### Test datasets
 
-We use 1000 test samples for CelebA-HQ and 100 test samples for FFHQ. Download the CelebA-HQ test set from https://github.com/wyhuai/DDNM (https://drive.google.com/drive/folders/1cSCTaBtnL7OIKXT4SVME88Vtk4uDd_u4) and place it into exp/datasets/celeba_hq. Download the FFHQ test set from https://drive.google.com/drive/folders/1PHQpjQLaltvnQgzI9WS9PHkpiwlZY_0dand place it into exp/datasets/ffhq (which is randomly sampled from the folder 00000 of https://github.com/NVlabs/ffhq-dataset). Thus the exp/ folder should look as follows:
+We use 1000 test samples for CelebA-HQ and 100 test samples for FFHQ. Download the CelebA-HQ test set from https://github.com/wyhuai/DDNM (https://drive.google.com/drive/folders/1cSCTaBtnL7OIKXT4SVME88Vtk4uDd_u4) and place it into exp/datasets/celeba_hq. Download the FFHQ test set from https://drive.google.com/file/d/1NcRFk9PPDVoH0F--1KbiGiM_9L79t1Qr/view?usp=drive_link and place it into exp/datasets/ffhq (which is randomly sampled from the folder 00000 of https://github.com/NVlabs/ffhq-dataset). Thus the exp/ folder should look as follows:
 
 ```bash
 exp
