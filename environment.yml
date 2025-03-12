@@ -1,4 +1,4 @@
-name: projdiff_ir
+name: LLE
 channels:
   - pytorch
   - conda-forge

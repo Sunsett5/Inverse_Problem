@@ -270,14 +270,15 @@ class Diffusion(object):
         # if 'sr' in deg or 'inp' in deg or 'deblur_gauss' in deg:
         self.args.sigma_0 = 2 * self.args.sigma_0 #to account for scaling to [-1,1]
         sigma_0 = self.args.sigma_0
-        train_path = '/home/zhangjiawei/scripts/inverse_learned_coeff/exp/image_samples/trainset_{}{}/orig'.format(dataset_name, self.args.dataset_id)
+        train_path = 'exp/image_samples/trainset_{}/orig'.format(dataset_name)
+        if not os.path.exist(train_path):
+            self.sample_uncond(model, dataset_name, nums=50, cls_fn=cls_fn)
         dst = os.sep.join([self.args.image_folder, 'trainset_{}'.format(dataset_name)])
         if os.path.exists(dst):
             shutil.rmtree(dst)
         os.makedirs(dst)
         os.symlink(train_path, os.sep.join([dst, 'orig']), target_is_directory=True)
         train_path = dst
-        # self.sample_uncond(model, dataset_name, nums=50, cls_fn=cls_fn)
         if self.learned:
             train_epochs = 100
             nums = 50
@@ -289,13 +290,6 @@ class Diffusion(object):
         elif self.args.algo == 'pigdm':
             if 'celeba' in self.args.config:
                 lam = 1.0
-            elif 'imagenet' in self.args.config:
-                if 'sr4' in deg:
-                    lam = 0.2
-                elif 'deblur_aniso' in deg:
-                    lam = 0.5
-                else:
-                    lam = 1.0
             else:
                 lam = 1.0
             self.algo = PiGDM(model, H_funcs, sigma_0, lam=lam)
@@ -317,15 +311,6 @@ class Diffusion(object):
                     lam = 0.1
                 elif 'sr4' in deg:
                     lam = 6.0
-                else:
-                    lam = 1.0
-            elif 'imagenet' in self.args.config:
-                if 'inp' in deg:
-                    lam = 0.5
-                elif 'sr4' in deg:
-                    lam = 1.5
-                elif 'deblur_aniso' in deg:
-                    lam = 0.1
                 else:
                     lam = 1.0
             elif 'ffhq' in self.args.config:
@@ -365,15 +350,6 @@ class Diffusion(object):
                     eta = 0.5
                 else:
                     eta = 1.0
-            elif 'imagenet' in self.args.config:
-                if 'inp' in deg:
-                    eta = 0.5
-                elif 'sr4' in deg:
-                    eta = 7.0
-                elif 'deblur_aniso' in deg:
-                    eta = 0.5
-                else:
-                    eta = 1.0
             elif 'ffhq' in self.args.config:
                 if 'cs' in deg:
                     eta = 0.5
@@ -391,27 +367,18 @@ class Diffusion(object):
                 eta = 1.0
             self.algo = RED_diff(model, H_funcs, sigma_0, eta=eta)
         elif self.args.algo == 'diffpir':
-            # if 'deblur_aniso' in deg:
-            #     lam = 4.0
-            # elif 'cs2' in deg:
-            #     lam = 4.0
-            # else:
             lam = 7.0
             self.algo = DiffPIR(model, H_funcs, sigma_0, lam=lam)
         elif self.args.algo == 'dmps':
             self.algo = DMPS(model, H_funcs, sigma_0)
         elif self.args.algo == 'resample':
-            if deg == 'deblur_aniso':
-                gamma = 100
-            else:
-                gamma = 100
-            print(gamma)
+            gamma = 100
+            # print(gamma)
             self.algo = ReSample(model, H_funcs, sigma_0, gamma=gamma)
         elif self.args.algo == 'daps':
             self.algo = DAPS(model, H_funcs, sigma_0, betas=self.betas, nonlinear=not H_funcs.is_linear())
         else:
             raise NotImplementedError
-        # 再用采样出来的样本你和coeff
         # print(H_funcs.is_linear)
         if H_funcs.is_linear():
             self.train_as_a_whole = False
@@ -423,7 +390,6 @@ class Diffusion(object):
 
 
     def coeff_learning(self, train_path, model, dataset_name, nums, H_funcs, sigma_0, train_epochs):
-        # 这里需要预先确定最后是多少步的采样
         # train_path = 'exp/image_samples/trainset_{}/'.format(dataset_name)
         skip = self.num_timesteps // self.args.timesteps
         seq = range(0, self.num_timesteps-1, skip)
@@ -449,11 +415,9 @@ class Diffusion(object):
             for i, j in tqdm.tqdm(zip(reversed(seq), reversed(seq_next))):
                 os.makedirs(os.sep.join([train_path, str(i)]), exist_ok=True)
                 steps.append(str(i))
-                # 读出来所有的数据，过一步DDNM
                 for k in range(nums):
                     orig_image = np.load(os.sep.join([train_path, 'orig', '{}.npy'.format(k)]))
                     orig_image = torch.from_numpy(orig_image).cuda().unsqueeze(0)
-                    # 做退化
                     if init_y_0:
                         y_0 = H_funcs.H(orig_image)
                         # print(sigma_0)
@@ -469,26 +433,22 @@ class Diffusion(object):
                     next_t = (torch.ones(n) * j).to(self.device)
                     at = compute_alpha(b, t.long())
                     at_next = compute_alpha(b, next_t.long())
-                    # 加噪
                     # print(t_last)
                     if t_last == 1000:
                         xt = torch.randn_like(orig_image)
                         x0_t_last = None
                     else:
-                        # 读取数据集中的x0_pred
                         x0_pred_last = np.load(os.sep.join([train_path, str(t_last), 'x0_pred_{}.npy'.format(k)]))
                         x0_pred_last = torch.from_numpy(x0_pred_last).cuda().unsqueeze(0)
                         add_up_last = np.load(os.sep.join([train_path, str(t_last), 'add_up_{}.npy'.format(k)]))
                         add_up_last = torch.from_numpy(add_up_last).cuda().unsqueeze(0)
                         xt = self.algo.map_back(x0_pred_last, y_0, add_up_last, at, at_last)
                         x0_t_last = x0_pred_last
-                        # 投影
                     if self.args.algo == 'reddiff':
                         x0_t, add_up = self.algo.cal_x0(xt, x0_t_last, t, at, at_next, y_0, learned=self.learned)
                     else:
                         x0_t, add_up = self.algo.cal_x0(xt, t, at, at_next, y_0, learned=self.learned)
                     # calcultate mu and sigma in DDNM
-                    # 保存x0_t_hat
                     add_up_save = add_up.detach().cpu().numpy()[0]
                     x0_t_save = x0_t.detach().cpu().numpy()[0]
                     np.save(os.sep.join([train_path, str(i), 'x0_{}.npy'.format(k)]), x0_t_save)
@@ -496,38 +456,17 @@ class Diffusion(object):
                     # xt_next = x0_t_hat
                     # x0_preds.append(x0_t.to('cpu'))
                     # xs.append(xt_next.to('cpu'))
-                # 训练一个可学习的插值向量，分成观测到的部分，和未观测到的部分
                 init_y_0 = False
                 dataset = NpyDataset(nums=nums, root_dir=train_path, steps=steps)
                 dataloader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=False)
                 with torch.enable_grad():
-                    # lr = max(0.01 * (1-at[0,0,0,0]), 0.0001)
-                    # if i == seq[-1]:
-                    #     lr = 0.0
-                    #     train_epochs = 1
-                    # else:
-                    if 'imagenet' in self.args.config:
-                        if self.args.algo == 'ddnm':
-                            if 'inpainting' in self.args.deg:
-                                lr = 0.0005 * 20 / self.args.timesteps
-                            elif 'sr4' in self.args.deg:
-                                lr = 0.0005 * 20 / self.args.timesteps
-                            elif 'deblur_aniso' in self.args.deg:
-                                lr = 0.0005 * 20 / self.args.timesteps
-                        elif self.args.algo == 'dps':
-                            lr = 0.005 * 20 / self.args.timesteps
-                        elif self.args.algo == 'pigdm':
-                            lr = 0.005 * 20 / self.args.timesteps
-                        else:
-                            lr = 0.002 * 20 / self.args.timesteps
-                    # elif 'ffhq' in self.args.config:
-                    #     if 'aniso' in self.args.deg:
-                    #         if self.args.algo == 'ddnm' or self.args.algo == 'ddrm':
-                    #             lr = 0.0005 * 20 / self.args.timesteps
-                    elif 'ffhq' in self.args.config:
-                        if 'nonlinear' in self.args.deg:
-                            if self.args.algo == 'resample' or self.args.algo == 'daps':
-                                lr = 0.01 * 20 / self.args.timesteps * at_last[0,0,0,0]
+                    if self.args.default_lr:
+                        if 'ffhq' in self.args.config:
+                            if 'nonlinear' in self.args.deg:
+                                if self.args.algo == 'resample' or self.args.algo == 'daps':
+                                    lr = 0.01 * 20 / self.args.timesteps * at_last[0,0,0,0]
+                                else:
+                                    lr = 0.002 * 20 / self.args.timesteps
                             else:
                                 lr = 0.002 * 20 / self.args.timesteps
                         else:
@@ -591,7 +530,6 @@ class Diffusion(object):
                                     coeff_free[-1] = 1.0 
                         optimizer_obs.zero_grad()
                         optimizer_free.zero_grad()
-                        # 先处理一下data，分成观测到的部分和未观测到的部分
                         data_obs = torch.randn_like(data)
                         if self.train_as_a_whole:
                             data_obs = data
@@ -599,7 +537,6 @@ class Diffusion(object):
                             for row in range(data.shape[0]):
                                 data_obs[row] = H_funcs.H_pinv(H_funcs.H(data[row])).view(data[row].shape)
                         data_free = data - data_obs
-                        # 做拟合
                         pred_obs = None
                         pred_free = None
                         for k_coeff in range(len(steps)):
@@ -622,12 +559,10 @@ class Diffusion(object):
                         if epoch % 10 == 0 and idx == 0:
                             print('t:{}, epoch:{}, idx:{}/{}, loss_mse:{}, loss_lpips:{}, loss_inception:{}'.format(i, epoch, idx, len(dataloader), loss_dict['loss_mse'].item(), loss_dict['loss_lpips'].item(), loss_dict['loss_inception'].item()))
                     last_loss = loss.item()
-                # 把coeff存成npy文件
                 np.save(os.sep.join([train_path, str(i), 'coeff_obs.npy']), coeff_obs.detach().cpu().numpy())
                 np.save(os.sep.join([train_path, str(i), 'coeff_free.npy']), coeff_free.detach().cpu().numpy())
                 # print(coeff_obs)
                 # print(coeff_free)
-                # 用目前学到的coeff做一遍推理，并存下来
                 dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
                 for idx, (data, _, _) in enumerate(dataloader):
                     data = data.cuda()
@@ -657,7 +592,7 @@ class Diffusion(object):
     def sample_uncond(self, model, dataset_name, nums, cls_fn=None, classes=None):
         os.makedirs('exp/image_samples/trainset_{}/orig/'.format(dataset_name), exist_ok=True)
         with torch.no_grad():
-            skip = 1 # 用1000步DDIM采
+            skip = 1
             seq = range(0, self.num_timesteps-1, skip)
             idx_so_far = 0
             for _ in tqdm.tqdm(range(nums)):
