@@ -3,11 +3,10 @@ from algos.base_algo import Base_Algo
 from torch.nn import Parameter
 from optim.sf_adamw import AdamWScheduleFree
 # from torch.optim import 
-# 输入xt, model, sigma_0, 返回输出的x0_t和需要叠加的东西
 
 class ReSample(Base_Algo):
     def __init__(self, model, H_funcs, sigma_0, cls_fn=None, gamma=100.0, eta=0.85):
-        super().__init__(model, H_funcs, sigma_0, cls_fn)  # 调用父类的 __init__ 方法
+        super().__init__(model, H_funcs, sigma_0, cls_fn)
         self.gamma = gamma
         self.eta = eta
 

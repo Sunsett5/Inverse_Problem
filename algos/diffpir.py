@@ -2,11 +2,10 @@ import torch
 from algos.base_algo import Base_Algo
 from torch.nn import Parameter
 from optim.sf_adamw import AdamWScheduleFree
-# 输入xt, model, sigma_0, 返回输出的x0_t和需要叠加的东西
 
 class DiffPIR(Base_Algo):
     def __init__(self, model, H_funcs, sigma_0, cls_fn=None, lam=1.0, eta=0.85, lr=0.1):
-        super().__init__(model, H_funcs, sigma_0, cls_fn)  # 调用父类的 __init__ 方法
+        super().__init__(model, H_funcs, sigma_0, cls_fn)
         self.lam = lam
         self.eta = eta
         self.lr = lr

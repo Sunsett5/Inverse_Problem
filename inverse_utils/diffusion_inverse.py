@@ -139,7 +139,7 @@ class Diffusion(object):
                 print("Loading checkpoint {}".format(ckpt))
             elif name == 'celeba_hq':
                 #ckpt = '~/.cache/diffusion_models_converted/celeba_hq.ckpt'
-                ckpt = '/nas/datasets/zjw/ddrm/celeba_hq.ckpt'
+                ckpt = 'exp/logs/celeba/celeba_hq.ckpt'
                 if not os.path.exists(ckpt):
                     download('https://image-editing-test-12345.s3-us-west-2.amazonaws.com/checkpoints/celeba_hq.ckpt', ckpt)
             else:
@@ -181,7 +181,6 @@ class Diffusion(object):
             dataset_name = 'ffhq'
         else:
             dataset_name = 'unknown'
-        # 先无条件采400个数据出来做训练集，保存在exp/image_samples/trainset
         ## get degradation matrix ##
         deg = self.args.deg
         H_funcs = None
@@ -218,7 +217,7 @@ class Diffusion(object):
                 up = 64
                 missing[left:left+128, left:left+128, :] = 1.0
                 missing = missing.view(-1).to(self.device).long()
-                missing = torch.nonzero(missing).squeeze()  # 去掉多余维度
+                missing = torch.nonzero(missing).squeeze() 
                 print(missing.shape)
             else:
                 # Random inpainting

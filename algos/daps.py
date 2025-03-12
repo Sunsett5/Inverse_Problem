@@ -3,7 +3,6 @@ from algos.base_algo import Base_Algo
 from torch.nn import Parameter
 from optim.sf_adamw import AdamWScheduleFree
 import tqdm
-# 输入xt, model, sigma_0, 返回输出的x0_t和需要叠加的东西
 
 def compute_alpha(beta, t):
     beta = torch.cat([torch.zeros(1).to(beta.device), beta], dim=0)
@@ -12,7 +11,7 @@ def compute_alpha(beta, t):
 
 class DAPS(Base_Algo):
     def __init__(self, model, H_funcs, sigma_0, cls_fn=None, eta0=1e-4, delta=1e-2, order=5, nonlinear=False, betas = []):
-        super().__init__(model, H_funcs, sigma_0, cls_fn)  # 调用父类的 __init__ 方法
+        super().__init__(model, H_funcs, sigma_0, cls_fn)
         self.nonlinear = nonlinear
         self.eta0 = eta0
         self.delta = delta
@@ -21,7 +20,6 @@ class DAPS(Base_Algo):
 
     @ torch.no_grad()
     def ode(self, xt, t, classes=None):
-        # 5步ddim求x0
         n = xt.shape[0]
         skip = t // (self.order - 1)
         if skip > 0:

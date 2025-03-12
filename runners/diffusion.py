@@ -109,7 +109,7 @@ class Diffusion(object):
             elif name == 'celeba_hq':
                 #ckpt = '~/.cache/diffusion_models_converted/celeba_hq.ckpt'
                 # ckpt = os.path.join(self.args.exp, "logs/celeba/celeba_hq.ckpt")
-                ckpt = '/nas/datasets/zjw/ddrm/celeba_hq.ckpt'
+                ckpt = 'exp/logs/celeba/celeba_hq.ckpt'
                 if not os.path.exists(ckpt):
                     download('https://image-editing-test-12345.s3-us-west-2.amazonaws.com/checkpoints/celeba_hq.ckpt', ckpt)
             else:
@@ -339,7 +339,6 @@ class Diffusion(object):
         skip = self.num_timesteps // self.args.timesteps
         seq = range(0, self.num_timesteps, skip)
         
-        # x: 初始噪声；seq: 时间下标序列；model: 扩散模型；betas: beta序列；H_funcs: 观测矩阵(maybe)；y_0: 观测；sigma_0: 观测噪声标准差；clas_fn: 分类器；classes: 类别
         x = efficient_generalized_steps(x, seq, model, self.betas, H_funcs, y_0, sigma_0, \
             etaB=self.args.etaB, etaA=self.args.eta, etaC=self.args.eta, cls_fn=cls_fn, classes=classes)
         if last:

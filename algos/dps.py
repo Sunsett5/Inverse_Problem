@@ -1,10 +1,9 @@
 import torch
 from algos.base_algo import Base_Algo
-# 输入xt, model, sigma_0, 返回输出的x0_t和需要叠加的东西
 
 class DPS(Base_Algo):
     def __init__(self, model, H_funcs, sigma_0, cls_fn=None, eta=1.0, lam=1.0):
-        super().__init__(model, H_funcs, sigma_0, cls_fn)  # 调用父类的 __init__ 方法
+        super().__init__(model, H_funcs, sigma_0, cls_fn)
         self.eta = eta
         self.lam = lam
 

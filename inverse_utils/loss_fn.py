@@ -10,12 +10,6 @@ class loss_fn:
     def __init__(self, lam=0.1):
         self.loss_fn_vgg = lpips.LPIPS(net='vgg').cuda()
         self.lam = lam
-        # self.feature_extractor = torch_fidelity.feature_extractor.InceptionV3FeatureExtractor()
-        # 1️⃣ 加载 Inception v3 预训练模型（去掉分类头）
-        # self.inception = models.inception_v3(pretrained=True)
-        # self.inception.fc = nn.Identity()  # 让 Inception v3 直接输出 2048 维特征
-        # self.inception.cuda()
-        # self.inception.eval()  # 进入评估模式（如果训练时需 fine-tune，可改为 `train()`）
     @torch.enable_grad()
     def get_loss(self, pred, gt):
         loss_mse = torch.mean((pred - gt)**2)

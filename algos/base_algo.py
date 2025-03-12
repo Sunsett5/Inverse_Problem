@@ -9,10 +9,8 @@ class Base_Algo(ABC):
     
     @abstractmethod
     def cal_x0(self, xt, t, at, at_next, classes):
-        # 返回x0_t和需要叠加的东西
         pass
     
     @abstractmethod
     def map_back(self, x0_t, y_0, add_up, at_next, at):
-        # 返回下一轮xt_next
         pass
