@@ -25,7 +25,6 @@ conda activate LLE
 Download the nonlinear blurring models from https://github.com/VinAIResearch/blur-kernel-space-exploring.
 ```
 git clone https://github.com/VinAIResearch/blur-kernel-space-exploring bkse
-
 ```
 
 ## Experiments in the paper
