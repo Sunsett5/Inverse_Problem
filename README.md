@@ -22,6 +22,11 @@ You can set up the environment using the `environment.yml` (the requirement is t
 conda env create -f environment.yml
 conda activate LLE
 ```
+Download the nonlinear blurring models from https://github.com/VinAIResearch/blur-kernel-space-exploring.
+```
+git clone https://github.com/VinAIResearch/blur-kernel-space-exploring bkse
+
+```
 
 ## Experiments in the paper
 
