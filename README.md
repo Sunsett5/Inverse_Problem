@@ -12,11 +12,7 @@ This project is based on:
 \- https://github.com/weigerzan/ProjDiff (ProjDiff)
 ## Environment
 
-You can set up the environment using the `environment.yml` (the requirement is the same as 
-
-[DDRM]: https://github.com/bahjat-kawar/ddrm
-
-). Run
+You can set up the environment using the `environment.yml` (the requirement is the same as [DDRM]: https://github.com/bahjat-kawar/ddrm). Run
 
 ```bash
 conda env create -f environment.yml
