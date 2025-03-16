@@ -79,4 +79,14 @@ The code will first sample 50 samples using the diffusion model if it's the firs
 We provide the example code for calculating the metrics in `calculate_metrics/`. Please first copy all the images using `mv_files.py` (mainly for FID calculation), and then run `cal_metrics.py` to calculate the metrics. Note that you may need to adjust the paths in the files.
 
 ## References and Acknowledgements
-
+```
+@misc{zhang2025improvingdiffusionbasedinversealgorithms,
+      title={Improving Diffusion-based Inverse Algorithms under Few-Step Constraint via Learnable Linear Extrapolation}, 
+      author={Jiawei Zhang and Ziyuan Liu and Leon Yan and Gen Li and Yuantao Gu},
+      year={2025},
+      eprint={2503.10103},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2503.10103}, 
+}
+```
